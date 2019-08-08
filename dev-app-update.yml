@@ -1,0 +1,3 @@
+provider: generic
+url: 'https://document-1-1255829223.cos.ap-shanghai.myqcloud.com/electron/'
+updaterCacheDirName: file_tool-updater
