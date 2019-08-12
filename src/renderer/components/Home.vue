@@ -2,13 +2,21 @@
   <div class="home">
     <Form ref="formItem" :model="formItem" :rules="formValidate" label-position="left" :label-width="150">
       <FormItem label="模版文件路径" prop="modulePath">
-        <Input type="text" v-model="formItem.modulePath" placeholder="Mac(/D/test/)   Windows(C:\Users\DSHui\Desktop\)" clearable/>
+        <div class="modulePath">
+          <Input type="text" v-model="formItem.modulePath" placeholder="Mac(/D/test/)   Windows(C:\Users\DSHui\Desktop\)" clearable/>
+          <Button class="modulePath-button" type="info" @click="importConfig">导入默认配置</Button>
+        </div>
       </FormItem>
       <FormItem label="模版文件匹配的字段" prop="modulePathFile">
         <Input type="text" v-model="formItem.modulePathFile" placeholder="例如：.java，test.vue" clearable/>
       </FormItem>
       <FormItem>
-        <Checkbox v-model="single">是否调用接口</Checkbox>
+        <div class="nextPath">
+          <Checkbox v-model="single">是否调用接口</Checkbox>
+          <Select v-if="single" v-model="moduleType" style="width:200px">
+            <Option v-for="item in moduleList" :value="item.code" :key="item.code">{{ item.title }}</Option>
+          </Select>
+        </div>
       </FormItem>
       <template v-if="single">
         <FormItem>
@@ -27,29 +35,37 @@
           <Input type="text" v-model="formItem.moduleName" clearable/>
         </FormItem>
       </template>
-      <FormItem label="文件内替换字符" prop="replaceContent">
+      <!-- <FormItem label="文件内替换字符" prop="replaceContent">
         <module-input v-model="formItem.replaceContent"></module-input>
       </FormItem>
       <FormItem label="文件名替换" prop="replaceFileName">
         <module-input v-model="formItem.replaceFileName" :icon="false"></module-input>
+      </FormItem> -->
+      <FormItem>
+        <a class="clickStyle" @click="openFileModal">文件替换内容信息</a>
       </FormItem>
       <FormItem label="生成文件路径(path)" prop="path">
         <!-- <module-input></module-input> -->
         <Input type="text" v-model="formItem.path" placeholder="Mac(/D/test/)   Windows(C:\\Users\\DSHui\\Desktop\\)" clearable/>
-        <Checkbox v-model="isNextPath" @change="readJson()">精确生成路径</Checkbox>
+        <div class="nextPath">
+          <Checkbox v-model="isNextPath" @change="readJson()">精确生成下级路径</Checkbox>
+          <a v-if="isNextPath" class="clickStyle" @click="openPathModal">下级路径信息</a>
+        </div>
       </FormItem>
-      <template v-if="isNextPath">
+      <!-- <template v-if="isNextPath">
         <FormItem label="精确下级路径" prop="nextPath" class="next-item">
           <module-input v-model="formItem.nextPath" :firstPlaceholder="'文件名的正则匹配'" :lastPlaceholder="'下级路径'"></module-input>
         </FormItem>
-      </template>
+      </template> -->
 
     </Form>
     <div class="home-btn">
       <Button type="primary" @click="createClassFile('formItem')">生成实体类</Button>
       <Button style="margin-left: 10px" @click="resetForm('formItem')">重置</Button>
     </div>
-    <sql-default :isShow="sqlShow" @cancel="sqlCancel" @sqlInfo="sqlInfo"></sql-default>
+    <sql-default ref="sql" :isShow="sqlShow" @cancel="sqlCancel" @sqlInfo="sqlInfo"></sql-default>
+    <file-replace ref="rep" :isShow="fileShow" @cancel="fileCancel" @replaceInfo="replaceInfo"></file-replace>
+    <next-path ref="nextPath" :isShow="pathShow" @cancel="pathCancel" @pathInfo="pathInfo"></next-path>
   </div>
 </template>
 <script>
@@ -60,6 +76,13 @@ import ModuleInput from '../component/moduleInput'
 
 // 数据库信息默认组件
 import SqlDefault from '../component/sqlDefault'
+
+// 文件内容替换
+import FileReplace from '../component/replaceContent'
+
+// 下级目录
+import NextPath from '../component/nextPath'
+
 
 
 let plat = '';
@@ -72,18 +95,6 @@ export default {
         return callback(new Error('路径不能为空！'))
       } else if (!(/^\/.*\/$/.test(value) || /^[CDEF]:.*\\$/.test(value))) {
         return callback(new Error('路径格式不正确，例如 Mac(/D/test/)--- Windows(C:\\Users\\DSHui\\Desktop\\)'))
-      } else {
-        callback()
-      }
-    }
-
-    // 替换字符验证
-    const contentRule = (rule, value, callback) => {
-      const result = value.every(item => {
-        return item.content !== '' && item.replace !== '';
-      })
-      if(!result) {
-        return callback(new Error('替换字符不能为空！'))
       } else {
         callback()
       }
@@ -104,6 +115,8 @@ export default {
       single: true,
       isNextPath: false,
       sqlShow: false,
+      fileShow: false,
+      pathShow: false,
       formItem: {
         modulePath: '',
         modulePathFile: '',
@@ -112,14 +125,15 @@ export default {
         database: '',
         username: '',
         password: '',
-        tableName: 'member',
-        keyId: 'memberId',
-        entityName: 'Member',
-        moduleName: 'member',
+        tableName: '',
+        keyId: '',
+        entityName: '',
+        moduleName: '',
         replaceContent: [{content: '', replace: ''}],
         replaceFileName: [{content: '', replace: ''}],
         path: '',
-        nextPath: [{content: '', replace: ''}]
+        nextPath: [{content: '', replace: ''}],
+        urlPath: []
       },
       formValidate: {
         modulePath: [
@@ -128,21 +142,6 @@ export default {
         modulePathFile: [
           {required: true, message: '模版文件匹配的字段不能为空！', trigger: 'blur'}
         ],
-        // host: [
-        //   {required: true, message: 'The host cannot be empty', trigger: 'blur'}
-        // ],
-        // port: [
-        //   {required: true, message: 'The port cannot be empty', trigger: 'blur'}
-        // ],
-        // database: [
-        //   {required: true, message: 'The database cannot be empty', trigger: 'blur'}
-        // ],
-        // username: [
-        //   {required: true, message: 'The username cannot be empty', trigger: 'blur'}
-        // ],
-        // password: [
-        //   {required: true, message: 'The password cannot be empty', trigger: 'blur'}
-        // ],
         tableName: [
           {required: true, message: 'The tableName cannot be empty', trigger: 'blur'}
         ],
@@ -155,19 +154,26 @@ export default {
         moduleName: [
           {required: true, message: 'The moduleName cannot be empty', trigger: 'blur'}
         ],
-        replaceContent: [
-          {required: true, validator: contentRule, trigger: 'blur'}
-        ],
-        replaceFileName: [
-          {required: true, validator: contentRule, trigger: 'blur'}
-        ],
+        // replaceContent: [
+        //   {required: true, validator: contentRule, trigger: 'blur'}
+        // ],
+        // replaceFileName: [
+        //   {required: true, validator: contentRule, trigger: 'blur'}
+        // ],
         path: [
           {required:true, validator: pathReg, trigger: 'blur'}
         ],
         nextPath: [
           {required: true, validator: pathRule, trigger: 'blur'}
         ],
-      }
+      },
+      moduleList: [
+        {title: '普通', code: 1},
+        {title: '表单', code: 2},
+        {title: '饰品明细', code: 4},
+        {title: 'SKU', code: 8},
+      ],
+      moduleType: 1
     }
   },
   mounted() {
@@ -185,14 +191,36 @@ export default {
   methods: {
     async createClassFile(name) {
       // 验证
-      const formResult = await this.$refs[name].validate((valid) => {
-        // if (valid) {
-        //   this.$Message.success('Success!');
-        // } else {
-        //   this.$Message.error('Fail!');
-        // }
-      })
+      console.log(this.formItem)
+      const formResult = await this.$refs[name].validate()
+      console.log(formResult)
       if (!formResult) return
+      if (!this.formItem.host
+          || !this.formItem.database
+          || !this.formItem.password
+          || !this.formItem.username
+          || !this.formItem.port
+          ) {
+        return this.$Message.error({
+          content: '数据库基本信息不正确，请检查！',
+          duration: 10,
+          closable: true
+        })
+      }
+      if (!this.formItem.replaceContent[0].content) {
+        return this.$Message.error({
+          content: '文件替换内容信息不正确，请检查！',
+          duration: 10,
+          closable: true
+        })
+      }
+      if (this.isNextPath && !this.formItem.nextPath[0].content) {
+        return this.$Message.error({
+          content: '下级路径信息不正确，请检查！',
+          duration: 10,
+          closable: true
+        })
+      }
       // 验证模版文件位置是否正确
       if (!fs.existsSync(this.formItem.modulePath)) {
         return this.$Message.error({
@@ -202,16 +230,16 @@ export default {
         })
       }
 
-
+      console.log(this.formItem)
       const createFloderBack = await this.createFloder(this.formItem.path);
       if (!createFloderBack) {
         return this.$Message.error({
-          content: '文件路径错误，请检查！',
+          content: '生成文件路径错误，请检查！',
           duration: 10,
           closable: true
         })
       }
-
+    
       // 调用接口生成文件
       if (this.single) {
         this.createFile()
@@ -238,13 +266,6 @@ export default {
         this.formItem.replaceContent.forEach(item => {
           newContent = newContent.replace(new RegExp(item.content, 'g'), item.replace)
         })
-        // const newContent = content.replace(new RegExp('templateModule', 'g'), this.formItem.moduleName)
-        //                           .replace(new RegExp('TemplateModule', 'g'), this.formItem.moduleName.replace(/^\S/,s => s.toUpperCase()))
-        //                           .replace(new RegExp('templateName', 'g'), this.formItem.entityName)
-        //                           .replace(new RegExp('TemplateName', 'g'), this.formItem.entityName.replace(/^\S/,s => s.toUpperCase()))
-        //                           .replace(new RegExp('tempalteMainIdStr', 'g'), this.formItem.keyId)
-        //                           .replace(new RegExp('TempalteMainIdStr', 'g'), this.formItem.keyId.replace(/^\S/,s => s.toUpperCase()))
-        //                           .replace(new RegExp('TEMPLATENAMEPROVIDER', 'g'), this.formItem.entityName.toUpperCase() + 'PROVIDER')
         if (!this.isNextPath) {
           fs.writeFileSync(`${this.formItem.path}${item.replace(this.formItem.replaceFileName[0].content, this.formItem.replaceFileName[0].replace)}`, newContent, (res) => {
             console.log(res);
@@ -252,7 +273,8 @@ export default {
         } else {
           // 精确匹配
           const result = this.formItem.nextPath.filter(ele => {
-            return item.indexOf(ele.content) !== -1
+            // return item.indexOf(ele.content) !== -1
+            return item == (ele.content + '.java')
           })
           if (result.length !== 0) {
             for(let i  = 0; i < result.length; i++) {
@@ -340,7 +362,8 @@ export default {
         tableName: this.formItem.tableName,
         keyId: this.formItem.keyId,
         entityName: this.formItem.entityName,
-        moduleName: this.formItem.moduleName
+        moduleName: this.formItem.moduleName,
+        operate: this.moduleType
       }
       this.$http({
         url: 'https://cs.mclon.com/config/develop/getModel',
@@ -351,14 +374,37 @@ export default {
         data: qs.stringify({jsonObject: encodeURI(JSON.stringify(params))})
       }).then(res => {
         if (res.data.status === '00000') {
-          fs.writeFile(`${this.formItem.path}${this.formItem.entityName}.java`, res.data.t, (res) => {
-
-          })
+          const files = res.data.t
+          console.log(this.formItem.urlPath)
+          if (this.formItem.urlPath.length !== 0) {
+            this.urlCreateFile(files, `${this.formItem.path}${this.formItem.urlPath[0].replace}`)
+          } else {
+            this.urlCreateFile(files, this.formItem.path)
+          }
         }
       })
     },
+    // 根据接口返回生成文件
+    async urlCreateFile(data, path) {
+      console.log(path)
+      const createFloderBack = await this.createFloder(path)
+      if (!createFloderBack) {
+        return this.$Message.error({
+          content: '文件路径错误，请检查！',
+          duration: 10,
+          closable: true
+        })
+      }
+      if (data) {
+        for(let item in data) {
+          let filename = item.replace('templateName', this.formItem.entityName)
+          fs.writeSync(`${path}${filename}.java`, data.item)
+        }
+      }
+    },
     resetForm(name) {
       this.$refs[name].resetFields()
+      localStorage.clear()
     },
     saveHistoryData() {
       localStorage.setItem('formItem', JSON.stringify(this.formItem))
@@ -367,7 +413,7 @@ export default {
     },
     readJson() {
       if (this.isNextPath) {
-
+        
       }
     },
     // 数据库基本信息
@@ -378,12 +424,85 @@ export default {
       this.sqlShow = false
     },
     sqlInfo(data) {
-      Object.assign(this.formItem, data)
-    }
+      // Object.assign(this.formItem, data)
+    },
+    // 导入默认配置
+    importConfig() {
+      this.$refs['formItem'].validateField('modulePath', (info) => {
+        if (!info) {
+          if (!fs.existsSync(this.formItem.modulePath)) {
+            return this.$Message.error({
+              content: '文件路径错误，请检查！',
+              duration: 10,
+              closable: true
+            })
+          }
+          if (!fs.existsSync(this.formItem.modulePath + 'config.json')){
+            return this.$Message.error({
+              content: '该文件夹内没有config.json，请检查！',
+              duration: 10,
+              closable: true
+            })
+          }
+          const content = fs.readFileSync(this.formItem.modulePath + 'config.json', 'utf-8')
+          this.$store.dispatch('Test/someAsyncTask', JSON.parse(content))
+          this.setDefaultValue()
+        }
+      })
+    },
+    setDefaultValue() {
+      const _tem = this.$store.state.Test.defaultConfig
+      if (_tem.templateFileSuffix) {
+        this.formItem.modulePathFile = _tem.templateFileSuffix
+      }
+      if (_tem.tableName) {
+        this.formItem.tableName = _tem.tableName
+      }
+      if (_tem.keyId) {
+        this.formItem.keyId = _tem.keyId
+      }
+      if (_tem.entityName) {
+        this.formItem.entityName = _tem.entityName
+      }
+      if (_tem.moduleName) {
+        this.formItem.moduleName = _tem.moduleName
+      }
+      if (_tem.createFilePath) {
+        this.formItem.path = _tem.createFilePath
+      }
+      if (_tem.createFileNextPathFlag) {
+        this.isNextPath = _tem.createFileNextPathFlag
+      }
+      this.$refs.sql.setDefaultValue()
+      this.$refs.rep.setDefaultValue()
+      this.$refs.nextPath.setDefaultValue()
+    },
+    // 文件内容替换
+    openFileModal() {
+      this.fileShow = true
+    },
+    fileCancel() {
+      this.fileShow = false
+    },
+    replaceInfo(data) {
+      // Object.assign(this.formItem, data)
+    },
+    // 下级目录
+    openPathModal() {
+      this.pathShow = true
+    },
+    pathCancel() {
+      this.pathShow = false
+    },
+    pathInfo(data) {
+      // Object.assign(this.formItem, data)
+    },
   },
   components: {
     ModuleInput,
-    SqlDefault
+    SqlDefault,
+    FileReplace,
+    NextPath
   }
 }
 </script>
@@ -400,5 +519,15 @@ export default {
 
   .clickStyle {
     font-size: 14px;
+  }
+  .modulePath {
+    display: flex;
+    &-button {
+      margin-left: 10px;
+    }
+  }
+  .nextPath {
+    display: flex;
+    justify-content: space-between;
   }
 </style>

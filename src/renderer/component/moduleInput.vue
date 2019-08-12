@@ -5,7 +5,7 @@
       <span class="input-box-space">--</span>
       <Input type="text" v-model="item.replace" :placeholder="lastPlaceholder" clearable/>
       <Icon class="input-box-add" type="md-add-circle" color="red" size="18" @click="addItem" v-if="index === 0 && icon"/>
-      <Icon class="input-box-add" type="md-remove-circle" color="green" size="18" v-if="index !== 0 && icon" @click="removeItem"/>
+      <Icon class="input-box-add" type="md-remove-circle" color="green" size="18" v-if="index !== 0 && icon" @click="removeItem(index)"/>
     </div>
   </div>
 </template>
@@ -36,12 +36,12 @@ export default {
   },
   methods: {
     addItem() {
-      this.value.unshift({
+      this.value.push({
         content: '', replace: ''
       })
     },
-    removeItem() {
-      this.value.pop()
+    removeItem(i) {
+      this.value.splice(i, 1)
     }
   }
 }

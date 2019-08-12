@@ -28,8 +28,6 @@
   },
   "plugins": [
     "transform-runtime",
-    "transform-vue-jsx",
-    // 配置iview的按需加载
     ["import", {
       "libraryName": "iview",
       "libraryDirectory": "src/components"

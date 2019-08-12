@@ -4,6 +4,7 @@
       v-model="modalShow"
       :loading="isLoading"
       @on-ok="ok('formItem')"
+      class-name="vertical-center-modal"
     >
         <p slot="header">数据库基本信息</p>
         <Form ref="formItem" :model="defaultItem" :rules="formValidate" label-position="left" :label-width="150">
@@ -27,7 +28,6 @@
   </div>
 </template>
 <script>
-import { setTimeout } from 'timers';
 export default {
   props: {
     isShow: {
@@ -51,7 +51,7 @@ export default {
       isLoading: true,
       defaultItem: {
         host: '',
-        port: '3306',
+        port: 3306,
         database: '',
         username: '',
         password: '',
@@ -77,9 +77,14 @@ export default {
     }
   },
   mounted() {
-    let _formItem = localStorage.getItem('formItem')
+    const _formItem = localStorage.getItem('formItem')
     if (_formItem) {
-      
+      const _data = JSON.parse(_formItem)
+      this.defaultItem.host = _data.host
+      this.defaultItem.port = _data.port
+      this.defaultItem.database = _data.database
+      this.defaultItem.username = _data.username
+      this.defaultItem.password = _data.password
     }
   },
   methods: {
@@ -95,6 +100,19 @@ export default {
       this.$emit('sqlInfo', this.defaultItem)
       this.$emit('cancel', false)
     },
+    setDefaultValue() {
+      const _tem = this.$store.state.Test.defaultConfig
+      this.defaultItem = {
+        host: _tem.host,
+        port: _tem.port,
+        database: _tem.database,
+        username: _tem.username,
+        password: _tem.password,
+      }
+      if (_tem.host && _tem.port && _tem.database && _tem.username && _tem.password) {
+        this.$emit('sqlInfo', this.defaultItem)
+      }
+    }
   }
 }
 </script>

@@ -2,6 +2,7 @@ import { app, BrowserWindow, Menu, MenuItem, globalShortcut, ipcMain } from 'ele
 // 发现新版本更新
 import {autoUpdater} from 'electron-updater'
 import path from 'path'
+import '../renderer/store'
 
 /**
  * Set `__static` path to static files in production
@@ -143,7 +144,6 @@ app.on('ready', () => {
   })
   // // 每次运行APP检测更新。这里设置延时是为了避免还未开始渲染，更新检测就已经完成(网速超快，页面加载跟不上)。
   setTimeout(() => {
-    console.log('tttt')
     // 检测是否有更新
     autoUpdater.checkForUpdates()
   }, 1500)

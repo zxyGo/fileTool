@@ -16,7 +16,9 @@ import {
   Icon,
   Checkbox,
   Modal,
-  Progress
+  Progress,
+  Select,
+  Option
 } from 'iview'
 import 'iview/dist/styles/iview.css'
 Vue.component('Form', Form)
@@ -28,6 +30,8 @@ Vue.component('Icon', Icon)
 Vue.component('Checkbox', Checkbox)
 Vue.component('Progress', Progress)
 Vue.component('Modal', Modal)
+Vue.component('Select', Select)
+Vue.component('Option', Option)
 Vue.prototype.$Message = Message
 Vue.prototype.$Modal = Modal
 
