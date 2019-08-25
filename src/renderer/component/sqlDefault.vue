@@ -15,7 +15,10 @@
             <Input type="text" v-model="defaultItem.port" clearable/>
           </FormItem>
           <FormItem label="数据库名(database)" prop="database">
-            <Input type="text" v-model="defaultItem.database" clearable/>
+            <!-- <Input type="text" v-model="defaultItem.database" clearable/> -->
+            <Select v-model="defaultItem.database" style="width:200px">
+              <Option v-for="(item, index) in databaseList" :value="item" :key="index">{{ item }}</Option>
+            </Select>
           </FormItem>
           <FormItem label="用户名(username)" prop="username">
             <Input type="text" v-model="defaultItem.username" clearable/>
@@ -51,7 +54,7 @@ export default {
       isLoading: true,
       defaultItem: {
         host: '',
-        port: 3306,
+        port: '3306',
         database: '',
         username: '',
         password: '',
@@ -73,11 +76,16 @@ export default {
           {required: true, message: 'The password cannot be empty', trigger: 'blur'}
         ],
       },
+      databaseList: []
       // modalShow: this.isShow
     }
   },
   mounted() {
     const _formItem = localStorage.getItem('formItem')
+    const _databaseList = localStorage.getItem('databaseList')
+    if (_databaseList) {
+      this.databaseList = JSON.parse(_databaseList)
+    }
     if (_formItem) {
       const _data = JSON.parse(_formItem)
       this.defaultItem.host = _data.host
@@ -90,6 +98,7 @@ export default {
   methods: {
     async ok(name) {
       const formResult = await this.$refs[name].validate()
+      console.log(this.defaultItem)
       if (!formResult) {
         this.isLoading = false
         setTimeout(() => {
@@ -104,13 +113,17 @@ export default {
       const _tem = this.$store.state.Test.defaultConfig
       this.defaultItem = {
         host: _tem.host,
-        port: _tem.port,
-        database: _tem.database,
+        port: _tem.port ? _tem.port.toString() : '3306',
+        database: '',
         username: _tem.username,
         password: _tem.password,
       }
-      if (_tem.host && _tem.port && _tem.database && _tem.username && _tem.password) {
+      if (_tem.databases) {
+        this.databaseList = _tem.databases;
+      }
+      if (_tem.host && _tem.port && _tem.username && _tem.password) {
         this.$emit('sqlInfo', this.defaultItem)
+        localStorage.setItem('databaseList', JSON.stringify(this.databaseList))
       }
     }
   }

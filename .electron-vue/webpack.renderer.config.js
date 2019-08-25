@@ -101,7 +101,8 @@ let rendererConfig = {
             name: 'fonts/[name]--[folder].[ext]'
           }
         }
-      }
+      },
+      { test: /iview.src.*?js$/, loader: 'babel-loader' },
     ]
   },
   node: {

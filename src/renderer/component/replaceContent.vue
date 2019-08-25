@@ -4,14 +4,16 @@
       v-model="modalShow"
       :loading="isLoading"
       @on-ok="ok('formItem')"
+      :width="620"
       class-name="vertical-center-modal"
     >
         <p slot="header">文件替换信息</p>
-        <Form ref="formItem" :model="defaultItem" :rules="formValidate" label-position="left" :label-width="150" style="marginRight: 16px">
+        <Form ref="formItem" :model="defaultItem" :rules="formValidate" label-position="left" :label-width="120" style="marginRight: 16px">
           <FormItem label="文件名替换" prop="replaceFileName">
             <module-input v-model="defaultItem.replaceFileName" :icon="false"></module-input>
           </FormItem>
           <FormItem label="文件内容替换字符" prop="replaceContent">
+            <Button type="info" class="replate-btn" @click="updateRule">服务端默认规则</Button>
             <module-input v-model="defaultItem.replaceContent"></module-input>
           </FormItem>
         </Form>
@@ -26,6 +28,14 @@ export default {
     isShow: {
       type: Boolean,
       default: false
+    },
+    tableName: {
+      type: String,
+      default: ''
+    },
+    moduleName: {
+      type: String,
+      default: ''
     }
   },
   computed: {
@@ -91,6 +101,71 @@ export default {
       if (_tem.replaceContents && _tem.replaceFileNames) {
         this.$emit('replaceInfo', this.defaultItem)
       }
+    },
+    // 更新规则
+    updateRule() {
+      // const _temArr = this.tableName.split('_')
+      // const smallCamelCase = _temArr.reduce((acc, cur, index) => {
+      //     index !== 0 ? acc.push(cur.replace(/^\S/, s => s.toUpperCase())) : acc.push(cur)
+      //     return acc
+      //   }, []).join('');
+      // const bigCamelCase = _temArr.reduce((acc, cur) => {
+      //     acc.push(cur.replace(/^\S/, s => s.toUpperCase()))
+      //     return acc
+      //   }, []).join('');
+      // const upperCase = _temArr.reduce((acc, cur) => {
+      //   acc.push(cur.toUpperCase)
+      //   return acc
+      // }, []).join('');
+      this.defaultItem.replaceContent.forEach(item => {
+        switch (item.content) {
+          case 'TemplateName':
+            item.replace = this.bigCamelCase(this.tableName);
+            break;
+          case 'TEMPLATENAMEPROVIDER':
+            item.replace = this.upperCase(this.tableName) + 'PROVIDER';
+            break;
+          case 'TempalteMainIdStr':
+            item.replace = this.bigCamelCase(this.tableName) + 'Id';
+            break;
+          case 'tempalteMainIdStr':
+            item.replace = this.smallCamelCase(this.tableName) + 'Id';
+            break;
+          case 'templateName':
+            item.replace = this.smallCamelCase(this.tableName);
+            break;
+          case 'TemplateModule':
+            item.replace = this.bigCamelCase(this.moduleName);
+            break;
+          case 'templateModule':
+            item.replace = this.smallCamelCase(this.moduleName);
+            break;
+        }
+      })
+    },
+    smallCamelCase(moduleString) {
+      const _temArr = moduleString.split('_')
+      const smallCamelCase = _temArr.reduce((acc, cur, index) => {
+          index !== 0 ? acc.push(cur.replace(/^\S/, s => s.toUpperCase())) : acc.push(cur)
+          return acc
+        }, []).join('');
+      return smallCamelCase;
+    },
+    bigCamelCase(moduleString) {
+      const _temArr = moduleString.split('_')
+      const bigCamelCase = _temArr.reduce((acc, cur) => {
+          acc.push(cur.replace(/^\S/, s => s.toUpperCase()))
+          return acc
+        }, []).join('');
+      return bigCamelCase;
+    },
+    upperCase(moduleString) {
+      const _temArr = moduleString.split('_')
+      const upperCase = _temArr.reduce((acc, cur) => {
+        acc.push(cur.toUpperCase())
+        return acc
+      }, []).join('');
+      return upperCase;
     }
   },
   components: {
@@ -98,3 +173,8 @@ export default {
   }
 }
 </script>
+<style lang="less" scoped>
+  .replate-btn {
+    margin-bottom: 10px;
+  }
+</style>

@@ -3,16 +3,17 @@
     <Modal 
       v-model="modalShow"
       :loading="isLoading"
+      :width="620"
       @on-ok="ok('formItem')"
       class-name="vertical-center-modal"
     >
         <p slot="header">下级路径信息</p>
-        <Form ref="formItem" :model="defaultItem" :rules="formValidate" label-position="left" :label-width="150" style="marginRight: 16px">
+        <Form ref="formItem" :model="defaultItem" :rules="formValidate" label-position="left" :label-width="120" style="marginRight: 16px">
           <FormItem label="接口文件下级路径" prop="urlPath">
             <module-input v-model="defaultItem.urlPath" :firstPlaceholder="'文件名的正则匹配'" :lastPlaceholder="'下级路径'" :icon="false"></module-input>
           </FormItem>
           <FormItem label="通用下级路径" prop="nextPath">
-            <module-input v-model="defaultItem.nextPath" :firstPlaceholder="'文件名的正则匹配'" :lastPlaceholder="'下级路径'"></module-input>
+            <checkbox-input v-model="defaultItem.nextPath" :firstPlaceholder="'文件名的正则匹配'" :lastPlaceholder="'下级路径'"></checkbox-input>
           </FormItem>
         </Form>
     </Modal>
@@ -20,6 +21,7 @@
 </template>
 <script>
 import ModuleInput from '../component/moduleInput'
+import CheckboxInput from '../component/checkboxInput'
 
 export default {
   props: {
@@ -106,10 +108,15 @@ export default {
       if (_tem.createFileNextPaths && _tem.createUrlFileNextPaths) {
         this.$emit('pathInfo', this.defaultItem)
       }
+    },
+    // 重置
+    resetForm() {
+      this.$refs.formItem.resetFields()
     }
   },
   components: {
-    ModuleInput
+    ModuleInput,
+    CheckboxInput
   }
 }
 </script>

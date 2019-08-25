@@ -23,3 +23,12 @@ This project was generated with [electron-vue](https://github.com/SimulatedGREG/
 
 
 // 重新点开重置
+// 增加更新提示
+
+### 按需引用iview时打包错误
+在打包的webpack中添加，
+```javascript
+{ test: /iview.src.*?js$/, loader: 'babel-loader' },
+```
+
+
