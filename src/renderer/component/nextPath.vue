@@ -3,7 +3,7 @@
     <Modal 
       v-model="modalShow"
       :loading="isLoading"
-      :width="620"
+      :width="820"
       @on-ok="ok('formItem')"
       class-name="vertical-center-modal"
     >
@@ -70,7 +70,7 @@ export default {
     return {
       isLoading: true,
       defaultItem: {
-        nextPath: [{content: '', replace: ''}],
+        nextPath: [{checked: true, content: '', replace: ''}],
         urlPath: [{content: '', replace: ''}],
       },
       formValidate: {
@@ -100,6 +100,7 @@ export default {
     setDefaultValue() {
       const _tem = this.$store.state.Test.defaultConfig
       if (_tem.createFileNextPaths) {
+        _tem.createFileNextPaths.forEach(item => item.checked = true)
         this.defaultItem.nextPath = _tem.createFileNextPaths
       }
       if (_tem.createUrlFileNextPaths) {

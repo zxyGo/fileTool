@@ -21,7 +21,7 @@
       </FormItem>
       <template v-if="single">
         <FormItem>
-          <a class="clickStyle" @click="openSqlModal">数据库基本信息</a>
+          <a class="clickStyle" @click="openSqlModal">接口调用信息</a>
         </FormItem>
         <FormItem label="模块名(moduleName)" prop="moduleName">
           <!-- <Input type="text" v-model="formItem.moduleName" clearable/> -->
@@ -189,6 +189,7 @@ export default {
       ],
       moduleType: 1,
       specialContent: '', // 特殊替换内容
+      baseUrl: 'https://cs.mclon.com'
     }
   },
   mounted() {
@@ -261,6 +262,14 @@ export default {
     
       // 调用接口生成文件
       if (this.single) {
+        if (!this.baseUrl) {
+          return
+          this.$Message.error({
+            content: '接口调用地址错误！',
+            duration: 10,
+            closable: true
+          })
+        }
         this.specialContent = '';
         await this.createFile()
       }
@@ -323,7 +332,7 @@ export default {
           // 精确匹配
           const result = this.formItem.nextPath.filter(ele => {
             // return item.indexOf(ele.content) !== -1
-            return item == (ele.content + '.java') && !ele.checked
+            return item == (ele.content + '.java') && ele.checked
           })
           if (result.length !== 0) {
             for(let i  = 0; i < result.length; i++) {
@@ -411,7 +420,7 @@ export default {
           operate: this.moduleType
         }
         this.$http({
-          url: 'https://cs.mclon.com/config/develop/getModel',
+          url: `${this.baseUrl}/config/develop/getModel`,
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -476,6 +485,7 @@ export default {
     },
     sqlInfo(data) {
       Object.assign(this.formItem, data)
+      this.baseUrl = data.url;
     },
     // 导入默认配置
     importConfig() {

@@ -5,7 +5,7 @@
         :indeterminate="indeterminate"
         :value="checkAll"
         @click.prevent.native="handleCheckAll"
-      >全选(勾选上表示不生成)</Checkbox>
+      >全选</Checkbox>
     </div>
     <CheckboxGroup v-model="checkAllGroup" @on-change="checkAllGroupChange">
       <div class="box-scroll">
@@ -15,7 +15,7 @@
         </Checkbox>
         <Input type="text" v-model="item.content" :placeholder="firstPlaceholder" clearable />
         <span class="input-box-space">--</span>
-        <Input type="text" v-model="item.replace" :placeholder="lastPlaceholder" clearable />
+        <Input type="textarea" v-model="item.replace" :autosize="{minRows: 3, maxRows: 5}" :placeholder="lastPlaceholder" clearable />
         <Icon
           class="input-box-add"
           type="md-add-circle"
@@ -42,7 +42,15 @@ export default {
   props: {
     value: {
       type: Array,
-      default: [{ content: "", replace: "" }]
+      // default: [{ content: "", replace: "" }]
+      default: function(data) {
+        console.log('----', data);
+        let _temArr = []
+        for (let i = 0; i < data.length; i++) {
+          _temArr.push(i)
+        }
+        this.checkAllGroup = _temArr
+      }
     },
     icon: {
       type: Boolean,
@@ -57,11 +65,26 @@ export default {
       default: "替换内容"
     }
   },
+  computed: {
+    checkAllGroup: {
+      get: function() {
+        console.log()
+        let _temArr = []
+        for (let i = 0; i < this.value.length; i++) {
+          if (this.value[i].checked)
+            _temArr.push(i)
+        }
+        return _temArr
+      },
+      set: function(data) {
+      }
+    }
+  },
   data() {
     return {
       indeterminate: false,
-      checkAll: false,
-      checkAllGroup: []
+      checkAll: true,
+      // checkAllGroup: []
     };
   },
   mounted() {},
@@ -115,7 +138,7 @@ export default {
   }
 };
 </script>
-<style lang="less" >
+<style lang="less" scoped>
 .input-box:not(:first-child) {
   margin-top: 10px;
 }
@@ -140,9 +163,9 @@ export default {
   border-bottom: 1px solid #e9e9e9;
   margin-bottom: 8px;
 }
-// .box-scroll {
-//   height: 400px;
-//   overflow: auto;
-
-// }
+.box-scroll {
+  height: 400px;
+  overflow: auto;
+  padding-right: 36px;
+}
 </style>

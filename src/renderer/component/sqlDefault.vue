@@ -6,8 +6,11 @@
       @on-ok="ok('formItem')"
       class-name="vertical-center-modal"
     >
-        <p slot="header">数据库基本信息</p>
+        <p slot="header">接口调用信息</p>
         <Form ref="formItem" :model="defaultItem" :rules="formValidate" label-position="left" :label-width="150">
+          <FormItem label="接口地址(url)" prop="url">
+            <Input type="text" v-model="defaultItem.url" clearable/>
+          </FormItem>
           <FormItem label="数据库地址(host)" prop="host">
             <Input type="text" v-model="defaultItem.host" clearable/>
           </FormItem>
@@ -53,6 +56,7 @@ export default {
     return {
       isLoading: true,
       defaultItem: {
+        url: 'https://cs.mclon.com',
         host: '',
         port: '3306',
         database: '',

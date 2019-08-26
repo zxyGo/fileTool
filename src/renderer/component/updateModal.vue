@@ -13,7 +13,11 @@
         提示
       </p>
       <div class="modal-content">发现有新版本【v{{version}}】，是否更新?</div>
-      <Progress :percent="percent" status="active" v-if="download"/>
+      <div class="update">
+        <p class="update-title">更新内容</p>
+        <p v-html="updateContent"></p>
+      </div>
+      <Progress :percent="percent" class="update-progress" status="active" v-if="download"/>
     </Modal>
   </div>
 </template>
@@ -26,7 +30,8 @@ export default {
       loading: true,
       version: '',
       download: false,
-      percent: 0
+      percent: 0,
+      updateContent:''
     }
   },
   created() {
@@ -34,8 +39,16 @@ export default {
         const self = this
         ipcRenderer.once('autoUpdater-canUpdate', (event, info) => {
           console.log(info)
+          this.$http({
+            url: 'https://document-1-1255829223.cos.ap-shanghai.myqcloud.com/electron/update.json',
+            method: 'get'
+          }).then(res=> {
+            console.log(res)
+            this.updateContent = res.data.update_content
+          })
           this.isShow = true;
           this.version = info.version
+          
         })
         // 下载进度
         ipcRenderer.on('autoUpdater-progress', (event, process) => {
@@ -103,6 +116,17 @@ export default {
 <style lang="less" scoped>
   .modal-content {
     font-size: 14px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+  }
+  .update {
+    padding: 0 10px;
+
+    &-title {
+      font-size: 14px;
+      font-weight: 700;
+    }
+  }
+  .update-progress {
+    margin-top: 10px;
   }
 </style>

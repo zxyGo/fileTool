@@ -45,7 +45,7 @@ Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false
 
 // 版本号
-Vue.prototype.version = 'v1.0.7'
+Vue.prototype.version = 'v1.0.9'
 
 /* eslint-disable no-new */
 new Vue({
