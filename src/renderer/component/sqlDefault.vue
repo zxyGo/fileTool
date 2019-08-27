@@ -116,7 +116,7 @@ export default {
     setDefaultValue() {
       const _tem = this.$store.state.Test.defaultConfig
       this.defaultItem = {
-        url: _tem.url,
+        url: _tem.url || this.defaultItem.url,
         host: _tem.host,
         port: _tem.port ? _tem.port.toString() : '3306',
         database: '',

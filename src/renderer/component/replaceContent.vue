@@ -22,6 +22,7 @@
 </template>
 <script>
 import ModuleInput from '../component/moduleInput'
+import { parseTime } from '../utils/index'
 
 export default {
   props: {
@@ -140,6 +141,8 @@ export default {
           case 'templateModule':
             item.replace = this.smallCamelCase(this.moduleName);
             break;
+          case 'TemplateCreateDate':
+            item.replace = parseTime(new Date(), '{y}-{m}-{d}')
         }
       })
     },
