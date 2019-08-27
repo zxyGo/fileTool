@@ -110,6 +110,31 @@ export default {
         this.$emit('pathInfo', this.defaultItem)
       }
     },
+    setNewValue(moduleName) {
+      const _tem = this.$store.state.Test.defaultConfig
+      debugger
+      if (_tem.createFileNextPaths) {
+        _tem.createFileNextPaths.map(createFileNextPath => {
+          const path = createFileNextPath.replace.replace(/pos/g,moduleName)
+          createFileNextPath.replace = path
+          return createFileNextPath
+        })
+        _tem.createFileNextPaths.forEach(item => item.checked = true)
+        this.defaultItem.nextPath = _tem.createFileNextPaths
+      }
+      debugger
+      if (_tem.createUrlFileNextPaths) {
+        _tem.createUrlFileNextPaths.map(urlFileNextPath => {
+          const path = urlFileNextPath.replace.replace(/pos/g,moduleName)
+          urlFileNextPath.replace = path
+          return urlFileNextPath
+        })
+        this.defaultItem.urlPath = _tem.createUrlFileNextPaths
+      }
+      if (_tem.createFileNextPaths && _tem.createUrlFileNextPaths) {
+        this.$emit('pathInfo', this.defaultItem)
+      }
+    },
     // 重置
     resetForm() {
       this.$refs.formItem.resetFields()

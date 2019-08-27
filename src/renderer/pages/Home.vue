@@ -3,7 +3,7 @@
     <Form ref="formItem" :model="formItem" :rules="formValidate" label-position="left" :label-width="150">
       <FormItem label="模版文件路径" prop="modulePath">
         <div class="modulePath">
-          <Input type="text" v-model="formItem.modulePath" placeholder="Mac(/D/test/)   Windows(C:\Users\DSHui\Desktop\)" clearable/>
+          <Input type="text" v-model="formItem.modulePath" placeholder陪="Mac(/D/test/)   Windows(C:\Users\DSHui\Desktop\)" clearable/>
           <Button class="modulePath-button" type="info" @click="importConfig">导入默认配置</Button>
           <Button class="modulePath-button" type="info" @click="coverConfig">更新默认配置</Button>
         </div>
@@ -579,8 +579,15 @@ export default {
     },
     // 根据表名替换主键、实体名
     refreshModule() {
-      const moduleName = this.formItem.tableName
-      const _temArr = moduleName.split('_')
+      if(this.formItem.moduleName === ""){
+        this.$Message.error({
+          content: '模块名不能为空！',
+          duration: 10,
+          closable: true
+        })
+      }
+      const tableName = this.formItem.tableName
+      const _temArr = tableName.split('_')
       // 实体主键
       const _resultArr = _temArr.reduce((acc, cur, index) => {
         index !== 0 ? acc.push(cur.replace(/^\S/, s => s.toUpperCase())) : acc.push(cur)
@@ -594,6 +601,7 @@ export default {
         return acc
       }, [])
       this.formItem.entityName = _resultArr_1.join('')
+      this.$refs.nextPath.setNewValue(this.formItem.moduleName)
     },
     // 重写config.json
     coverConfig() {
