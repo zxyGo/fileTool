@@ -112,20 +112,18 @@ export default {
     },
     setNewValue(moduleName) {
       const _tem = this.$store.state.Test.defaultConfig
-      debugger
       if (_tem.createFileNextPaths) {
         _tem.createFileNextPaths.map(createFileNextPath => {
-          const path = createFileNextPath.replace.replace(/pos/g,moduleName)
+          const path = createFileNextPath.replace.replace(/__templateModule/g,moduleName)
           createFileNextPath.replace = path
           return createFileNextPath
         })
         _tem.createFileNextPaths.forEach(item => item.checked = true)
         this.defaultItem.nextPath = _tem.createFileNextPaths
       }
-      debugger
       if (_tem.createUrlFileNextPaths) {
         _tem.createUrlFileNextPaths.map(urlFileNextPath => {
-          const path = urlFileNextPath.replace.replace(/pos/g,moduleName)
+          const path = urlFileNextPath.replace.replace(/__templateModule/g,moduleName)
           urlFileNextPath.replace = path
           return urlFileNextPath
         })

@@ -624,9 +624,9 @@ export default {
           const content = JSON.parse(fs.readFileSync(this.formItem.modulePath + 'config.json', 'utf-8'))
           console.log(content)
           content.createFileNextPathFlag = this.isNextPath;
-          content.createFileNextPaths = this.formItem.nextPath;
+          // content.createFileNextPaths = this.formItem.nextPath;
           content.createFilePath = this.formItem.path;
-          content.createUrlFileNextPaths = this.formItem.urlPath;
+          // content.createUrlFileNextPaths = this.formItem.urlPath;
           content.entityName = this.formItem.entityName;
           content.generateEntityFlag = this.single;
           content.host = this.formItem.host;
