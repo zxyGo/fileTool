@@ -111,7 +111,7 @@ export default {
       }
     },
     setNewValue(moduleName) {
-      const _tem = this.$store.state.Test.defaultConfig
+      const _tem = JSON.parse(JSON.stringify(this.$store.state.Test.defaultConfig))
       if (_tem.createFileNextPaths) {
         _tem.createFileNextPaths.map(createFileNextPath => {
           const path = createFileNextPath.replace.replace(/__templateModule/g,moduleName)
