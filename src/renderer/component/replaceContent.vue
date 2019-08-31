@@ -23,6 +23,7 @@
 <script>
 import ModuleInput from '../component/moduleInput'
 import { parseTime } from '../utils/index'
+import { debuglog } from 'util';
 
 export default {
   props: {
@@ -118,6 +119,7 @@ export default {
       //   acc.push(cur.toUpperCase)
       //   return acc
       // }, []).join('');
+      this.defaultItem.replaceFileName[0].replace = this.bigCamelCase(this.tableName);
       this.defaultItem.replaceContent.forEach(item => {
         switch (item.content) {
           case 'TemplateName':
